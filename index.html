@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Apprenants la Boussole</title>
+    <style>
+        /* Charte graphique copiée de exercice_nombres.html */
+        :root {
+            --yellow: #ffd83d;
+            --yellow-soft: #fff7d7;
+            --ink: #171717;
+            --green: #35a853;
+            --orange: #e67e22;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--ink);
+            background: #ffffff;
+            padding: 28px 20px 45px;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: clamp(26px, 4.5vw, 42px);
+            margin: 0 0 12px;
+            font-weight: 900;
+        }
+
+        /* Conteneur pour la consigne et son bouton audio */
+        .consigne-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: var(--yellow-soft);
+            border: 2px solid var(--ink);
+            padding: 12px 20px;
+            border-radius: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .subtitle {
+            font-size: clamp(16px, 2.2vw, 20px);
+            color: var(--ink);
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .liste-exercices {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .carte-exercice {
+            background: var(--yellow-soft);
+            border: 3px solid var(--ink);
+            border-radius: 25px;
+            padding: 22px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .carte-exercice:hover {
+            background: var(--yellow);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--ink);
+        }
+
+        .carte-exercice:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .carte-exercice.bleu { border-left-width: 10px; }
+        .carte-exercice.orange { border-left-color: var(--orange); border-left-width: 10px; }
+
+        .contenu-gauche {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        /* Style des boutons audio hérité de l'exercice */
+        .main-sound {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--yellow);
+            border: 3px solid var(--ink);
+            font-size: 26px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+
+        /* Style spécifique pour le haut-parleur de la consigne d'accueil */
+        .intro-sound {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            background: var(--yellow);
+        }
+
+        .carte-exercice:hover .main-sound {
+            background: #ffffff;
+        }
+
+        .main-sound:active {
+            transform: scale(0.9);
+        }
+
+        .carte-exercice h2 {
+            font-size: clamp(20px, 3vw, 24px);
+            font-weight: 900;
+        }
+        .carte-exercice img{
+            width:88px;
+            height:88px;
+            object-fit:contain;
+            background:var(--yellow-soft);
+            border:3px solid var(--ink);
+            border-radius:22px;
+            padding:8px;
+            flex-shrink:0;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 20px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 12px 35px;
+            }
+            .consigne-box {
+                padding: 10px 15px;
+                gap: 10px;
+            }
+            .carte-exercice {
+                padding: 16px;
+                gap: 12px;
+                border-radius: 20px;
+            }
+            .main-sound {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+  
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+<!-- Pour le format classique .ico -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<!-- Pour le format moderne .png (recommandé en complément) -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+<!-- Pour les appareils Apple (icône sur l'écran d'accueil) -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+    <div class="page">
+        <header>
+            <h1>Espace Apprenants la Boussole</h1>
+            <div class="consigne-box">
+                <p class="subtitle" id="texte-consigne">Sélectionnez un exercice pour commencer. Vous pourrez ensuite l'installer sur votre écran d'accueil.</p>
+                <button class="main-sound intro-sound" id="btn-intro" title="Écouter la consigne">🔊</button>
+            </div>
+        </header>
+
+        <main class="liste-exercices">
+            
+            <!-- Exercice 1 : Nombres -->
+            <a href="./nombre-chiffres/exercice_nombres.html" class="carte-exercice bleu">
+                <div class="contenu-gauche">
+                    <button class="main-sound" data-text="Apprendre les nombres" title="Écouter l'intitulé">🔊</button>
+                    <h2>Apprendre les nombres</h2>
+                </div>
+                <img src="./nombre-chiffres/icon.png" alt="Icône Nombres">
+            </a>
+
+            <!-- Exercice 2 : Heures -->
+            <a href="./nombre-heures/exercice_heures.html" class="carte-exercice bleu">
+                <div class="contenu-gauche">
+                    <button class="main-sound" data-text="Apprendre les heures" title="Écouter l'intitulé">🔊</button>
+                    <h2>Apprendre les heures</h2>
+                </div>
+                <img src="./nombre-heures/icon.png" alt="Icône Heures">
+            </a>
+
+            <!-- Exercice 3 : Son I -->
+            <a href="./son_i/exercice_son_i_atelier.html" class="carte-exercice orange">
+                <div class="contenu-gauche">
+                    <button class="main-sound" data-text="Reconnaître le son i" title="Écouter l'intitulé">🔊</button>
+                   <h2>Reconnaître le son i</h2>
+                </div>
+                <img src="./son_i/icon.png" alt="Icône Son I">
+            </a>
+
+        </main>
+
+        <footer>
+            <p>Activité autonome — fonctionne sans connexion Internet.</p>
+            <p>&copy; 2026 La Boussole 33840 Captieux. Tous droits réservés.</p>
+        </footer>
+    </div>
+
+    <script>
+        const synth = window.speechSynthesis;
+
+        // Fonction générique pour lire un texte
+        function lireTexte(texte) {
+            synth.cancel();
+            let utterance = new SpeechSynthesisUtterance(texte);
+            utterance.lang = "fr-FR";
+            utterance.rate = 0.82; // Vitesse adaptée
+            synth.speak(utterance);
+        }
+
+        // Écoute du bouton de la consigne générale d'accueil
+        document.getElementById('btn-intro').addEventListener('click', function() {
+            const texteGeneral = document.getElementById('texte-consigne').innerText;
+            lireTexte(texteGeneral);
+        });
+
+        // Écoute du clic sur les boutons audio des cartes
+        document.querySelectorAll('.liste-exercices .main-sound').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Évite de déclencher l'ouverture du lien de la carte
+                e.preventDefault();
+                e.stopPropagation();
+
+                const texteALire = this.getAttribute('data-text');
+                lireTexte(texteALire);
+            });
+        });
+    </script>
+</body>
+</html>
+
+<!--
+La-Boussole/
+├── index.html                     # Votre catalogue général (mis à jour avec les boutons audio)
+├── nombre-chiffres/               # DOSSIER EXERCICE 1
+│   ├── exercice_nombres.html      # renommé ou laissé tel quel
+│   ├── manifest.json              # Nom : "Les Nombres" -> start_url: ./exercice_nombres.html
+│   └── icon2.png
+├── nombre-heures/                 # DOSSIER EXERCICE 2
+│   ├── exercice_heures.html
+│   ├── manifest.json              # Nom : "Les Heures" -> start_url: ./exercice_heures.html
+│   └── icon.png
+└── son_i/                         # DOSSIER EXERCICE 3
+    ├── exercice_son_i_atelier.html
+    ├── manifest.json              # Nom : "Le son I" -> start_url: ./exercice_son_i_atelier.html
+    └── icon.png>
+-->
