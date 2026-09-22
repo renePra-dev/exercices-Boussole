@@ -6,6 +6,17 @@
 .card{background:var(--yellow);border-radius:30px;padding:22px;max-width:900px;margin:auto;text-align:center}.explain{background:var(--yellow-soft);border-radius:22px;padding:13px 18px;margin-bottom:15px;font-size:20px;font-weight:700}.number{background:var(--yellow-soft);border-radius:25px;min-height:245px;display:flex;align-items:center;justify-content:center;font-size:clamp(130px,20vw,190px);font-weight:900;line-height:1}.main-sound{width:78px;height:78px;border-radius:50%;background:var(--yellow);border:3px solid var(--ink);font-size:38px;cursor:pointer;margin:14px 0}.range{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:2px 0 20px}
 .choices{display:flex;justify-content:center;gap:22px;flex-wrap:wrap}.choice-wrap{width:145px;display:flex;flex-direction:column;align-items:center;gap:10px}.choice-sound{width:70px;height:70px;border-radius:50%;background:var(--ink);color:#fff;border:3px solid var(--ink);font-size:31px;cursor:pointer}.choice{width:145px;min-height:72px;border:3px solid var(--ink);background:#fff;border-radius:22px;font-size:29px;font-weight:900;cursor:pointer}.choice.selected{background:var(--ink);color:#fff}.card.correct{box-shadow:0 0 0 6px var(--green) inset}.card.wrong{box-shadow:0 0 0 6px var(--red) inset}.feedback{min-height:58px;margin-top:16px;font-size:23px;font-weight:900;display:flex;align-items:center;justify-content:center}.actions{display:flex;justify-content:center;gap:12px;margin-top:8px}.action{border:2px solid #222;background:#222;color:#fff;border-radius:18px;padding:14px 22px;font-size:19px;font-weight:800;cursor:pointer}.secondary{background:#fff;color:#222}.progress{max-width:900px;margin:20px auto 0;height:13px;border-radius:999px;background:#eee;overflow:hidden}.progress-bar{height:100%;width:0;background:var(--green);transition:width .25s}.progress-text{text-align:center;font-size:15px;font-weight:700;margin-top:8px}
 @media(max-width:600px){.page{padding:20px 12px 35px}.card{padding:14px}.number{min-height:210px}.choices{gap:12px}.choice-wrap,.choice{width:120px}.choice{min-height:65px}}
+/* Animation de secousse */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+/* Classe à appliquer sur la carte */
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
 </style>
 <!-- Lien vers le manifest de cet exercice -->
 <link rel="manifest" href="manifest.json">
@@ -20,22 +31,72 @@ const synth=speechSynthesis, units=["zéro","un","deux","trois","quatre","cinq",
 function fr(n){const names={0:"zéro",1:"un",2:"deux",3:"trois",4:"quatre",5:"cinq",6:"six",7:"sept",8:"huit",9:"neuf",10:"dix",11:"onze",12:"douze",13:"treize",14:"quatorze",15:"quinze",16:"seize",17:"dix sept",18:"dix huit",19:"dix neuf",20:"vingt",21:"vingt et un",22:"vingt deux",23:"vingt trois",24:"vingt quatre",25:"vingt cinq",26:"vingt six",27:"vingt sept",28:"vingt huit",29:"vingt neuf",30:"trente",31:"trente et un",32:"trente deux",33:"trente trois",34:"trente quatre",35:"trente cinq",36:"trente six",37:"trente sept",38:"trente huit",39:"trente neuf",40:"quarante",41:"quarante et un",42:"quarante deux",43:"quarante trois",44:"quarante quatre",45:"quarante cinq",46:"quarante six",47:"quarante sept",48:"quarante huit",49:"quarante neuf",50:"cinquante",51:"cinquante et un",52:"cinquante deux",53:"cinquante trois",54:"cinquante quatre",55:"cinquante cinq",56:"cinquante six",57:"cinquante sept",58:"cinquante huit",59:"cinquante neuf"};return names[n]||String(n)}
 function speak(s){synth.cancel();let u=new SpeechSynthesisUtterance(s);u.lang="fr-FR";u.rate=.82;synth.speak(u)}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-const ranges={10:[0,10],24:[0,24],59:[0,59]};let step="learn",range=10,target=7,props=[],selected=null,locked=false,exercise=1;
+const ranges={10:[0,10],24:[0,24],59:[0,59]};
+let step="learn",range=10,target=7,props=[],selected=null,locked=false,exercise=1;
+
 function makeProps(){let [a,b]=ranges[range],set=new Set([target]);while(set.size<3){let rev=parseInt(String(target).split("").reverse().join("")),opts=[target-2,target-1,target+1,target+2,target+10,target-10,rev,rnd(a,b)],x=opts[rnd(0,opts.length-1)];if(x<a||x>b)x=rnd(a,b);set.add(x)}props=[...set];for(let i=props.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[props[i],props[j]]=[props[j],props[i]]}}
-function reset(){selected=null;locked=false;card.classList.remove("correct","wrong");feedback.textContent=""}
-function render(){reset();number.textContent=target;progress.textContent="Exercice "+exercise;bar.style.width=(((exercise-1)%10+1)*10)+"%";validate.style.display="none";choices.innerHTML="";
- if(step==="learn"){explain.textContent="Regarde le chiffre. Écoute son nom. Tu peux réécouter autant de fois que tu veux.";hint.textContent="Écoute 🔊 puis répète le nombre à voix haute.";setTimeout(()=>speak(fr(target)),250);return}
- if(step==="listen"){explain.textContent="Écoute le nombre, puis écoute les trois propositions.";hint.textContent="Écoute chaque 🔊. Quand tu as trouvé, choisis la réponse juste en dessous.";setTimeout(()=>speak(fr(target)),250)}
- else{explain.textContent="Regarde le chiffre et retrouve le bon nombre parmi les trois propositions.";hint.textContent="Écoute chaque 🔊. Puis choisis la proposition qui correspond au chiffre."}
- makeProps();props.forEach((v,i)=>{let w=document.createElement("div");w.className="choice-wrap";let s=document.createElement("button");s.className="choice-sound";s.textContent="🔊";s.onclick=()=>speak(fr(v));let b=document.createElement("button");b.className="choice";b.textContent=["①","②","③"][i];b.onclick=()=>choose(i);w.append(s,b);choices.append(w)})
- if(step==="recognize")validate.style.display="inline-block"
+
+// MODIFICATION ICI : On enlève aussi la classe "selected" des boutons visuellement
+function reset(){
+  selected=null;
+  locked=false;
+  card.classList.remove("correct","wrong");
+  feedback.textContent="";
+  document.querySelectorAll(".choice").forEach(b => b.classList.remove("selected"));
 }
-function choose(i){if(locked)return;selected=i;document.querySelectorAll(".choice").forEach((b,j)=>b.classList.toggle("selected",i===j));if(step!=="recognize")check()}
-function check(){if(selected===null||locked)return;locked=true;let ok=props[selected]===target;card.classList.add(ok?"correct":"wrong");feedback.textContent=ok?"👏 Bien joué !":"Écoute encore et essaie une nouvelle fois.";speak(ok?"Bien joué !":"Écoute encore et essaie une nouvelle fois.")}
-main.onclick=()=>speak(fr(target));intro.onclick=()=>speak(step==="learn"?"Regarde le chiffre, écoute son nom, puis répète-le.":step==="listen"?"Écoute le nombre, puis écoute les trois propositions. Choisis la bonne réponse.":"Regarde le chiffre. Écoute les trois propositions. Choisis celle qui correspond au chiffre.");validate.onclick=check;next.onclick=()=>{exercise++;target=rnd(...ranges[range]);render()};
+
+function render(){
+  reset();
+  number.textContent=target;
+  progress.textContent="Exercice "+exercise;
+  bar.style.width=(((exercise-1)%10+1)*10)+"%";
+  validate.style.display="none";
+  choices.innerHTML=""; 
+  if(step==="learn"){explain.textContent="Regarde le chiffre. Écoute son nom. Tu peux réécouter autant de fois que tu veux.";hint.textContent="Écoute 🔊 puis répète le nombre à voix haute.";setTimeout(()=>speak(fr(target)),250);return} 
+  if(step==="listen"){explain.textContent="Écoute le nombre, puis écoute les trois propositions.";hint.textContent="Écoute chaque 🔊. Quand tu as trouvé, choisis la réponse juste en dessous.";setTimeout(()=>speak(fr(target)),250)} 
+  else{explain.textContent="Regarde le chiffre et retrouve le bon nombre parmi les trois propositions.";hint.textContent="Écoute chaque 🔊. Puis choisis la proposition qui correspond au chiffre."} 
+  makeProps();
+  props.forEach((v,i)=>{let w=document.createElement("div");w.className="choice-wrap";let s=document.createElement("button");s.className="choice-sound";s.textContent="🔊";s.onclick=()=>speak(fr(v));let b=document.createElement("button");b.className="choice";b.textContent=["1","2","3"][i];b.onclick=()=>choose(i);w.append(s,b);choices.append(w)}) 
+  if(step==="recognize")validate.style.display="inline-block"
+}
+
+function choose(i){
+  if(locked) return;
+  selected=i;
+  document.querySelectorAll(".choice").forEach((b,j)=>b.classList.toggle("selected",i===j));
+  if(step!=="recognize") check();
+}
+
+function check(){
+  if(selected===null||locked)return;
+  locked=true;
+  let ok=props[selected]===target;
+  card.classList.add(ok?"correct":"wrong");
+  if(!ok) {
+    // Ajoute la secousse
+    card.classList.add("shake");
+    // Retire la classe après 400ms (durée de l'animation) pour pouvoir la rejouer plus tard
+    setTimeout(() => card.classList.remove("shake"), 400);
+  }
+  feedback.textContent=ok?"👏 Bien joué !":"Écoute encore et essaie une nouvelle fois.";
+  speak(ok?"Bien joué !":"Écoute encore et essaie une nouvelle fois.")
+}
+
+// MODIFICATION ICI : Si la réponse était fausse, on réinitialise l'état pour rejouer
+main.onclick=()=>{
+  speak(fr(target));
+  if(card.classList.contains("wrong")){
+    reset();
+  }
+};
+
+intro.onclick=()=>speak(step==="learn"?"Regarde le chiffre, écoute son nom, puis répète-le.":step==="listen"?"Écoute le nombre, puis écoute les trois propositions. Choisis la bonne réponse.":"Regarde le chiffre. Écoute les trois propositions. Choisis celle qui correspond au chiffre.");
+validate.onclick=check;
+next.onclick=()=>{exercise++;target=rnd(...ranges[range]);render()};
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{step=b.dataset.step;document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()});
 function setRange(r,id){range=r;exercise=1;target=rnd(...ranges[r]);document.querySelectorAll(".range button").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");render()}
-r10.onclick=()=>setRange(10,"r10");r24.onclick=()=>setRange(24,"r24");r59.onclick=()=>setRange(59,"r59");render();
+r10.onclick=()=>setRange(10,"r10");r24.onclick=()=>setRange(24,"r24");r59.onclick=()=>setRange(59,"r59");
+render();
 </script>
 
 <!-- Script pour enregistrer le Service Worker de cet exercice -->
