@@ -17,6 +17,51 @@
   animation: shake 0.4s ease-in-out;
 }
 
+/* Ce code s'applique uniquement aux écrans de moins de 600px (smartphones) */
+@media(max-width:600px){
+  .page{padding:20px 12px 35px}
+  .card{padding:14px}
+  .number{min-height:210px}
+  
+  /* --- MODIFICATIONS POUR L'ALIGNEMENT HORIZONTAL --- */
+  .choices {
+    display: flex;
+    flex-direction: row;        /* Force l'alignement en ligne */
+    flex-wrap: nowrap;          /* Interdit le retour à la ligne vertical */
+    justify-content: space-around; /* Répartit les éléments uniformément */
+    gap: 6px;                   /* Réduit l'espace entre les blocs */
+    width: 100%;                /* Prend toute la largeur de l'écran */
+  }
+
+  .choice-wrap {
+    width: 23%;                 /* Permet aux blocs de se partager la largeur (ex: ~4 blocs) */
+    gap: 6px;                   /* Réduit l'espace vertical interne */
+  }
+
+  .choice-sound {
+    width: 45px;                /* Réduit le bouton de son (70px -> 45px) */
+    height: 45px;
+    font-size: 20px;            /* Diminue l'icône/texte à l'intérieur */
+  }
+
+  .choice {
+    width: 100%;                /* S'adapte à la largeur du choice-wrap */
+    min-height: 50px;           /* Réduit la hauteur du bouton (65px -> 50px) */
+    border-radius: 14px;        /* Arrondis plus discrets */
+    font-size: 16px;            /* Texte beaucoup plus petit pour ne pas déborder (29px -> 16px) */
+  }
+  
+  .feedback {
+    font-size: 18px;            /* Réduit le texte de feedback */
+  }
+  
+  .action {
+    padding: 10px 16px;         /* Réduit les boutons d'action du bas */
+    font-size: 16px;
+  }
+}
+
+
 </style>
 <!-- Lien vers le manifest de cet exercice -->
 <link rel="manifest" href="manifest.json">
