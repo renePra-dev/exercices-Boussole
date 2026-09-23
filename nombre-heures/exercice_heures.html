@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lire l'heure — activité</title>
+<style>
+  :root {
+    --yellow: #ffd83d;
+    --yellow-soft: #fff7d7;
+    --cream: #fffdf5;
+    --ink: #171717;
+    --green: #35a853;
+    --red: #d94841;
+    --blue: #2367d1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    color: var(--ink);
+  }
+  .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 40px; }
+  header { text-align: center; margin-bottom: 22px; }
+  h1 { font-size: clamp(30px, 5vw, 48px); margin: 0 0 8px; }
+  .subtitle { font-size: clamp(18px, 2.5vw, 25px); margin: 0 0 18px; }
+  .sound {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 62px; height: 62px; border-radius: 50%; background: var(--yellow);
+    font-size: 38px; font-weight: 800; margin: 0 6px; cursor: pointer; border: 0;
+  }
+  
+  /* --- GESTION DES NIVEAUX (PC / DE BASE) --- */
+  .mode { 
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 18px auto 10px; 
+    position: relative;
+    z-index: 10; /* Assure que la zone reste cliquable */
+  }
+  .mode button {
+    border: 2px solid #222; background: white; border-radius: 999px;
+    padding: 10px 16px; font-size: 16px; cursor: pointer;
+  }
+  .mode button.active { background: #222; color: #fff; }
+  
+  .hint { text-align: center; min-height: 28px; font-size: 17px; font-weight: 600; margin: 10px 0 18px; }
+  .exercise {
+    background: var(--yellow); border-radius: 30px; padding: 18px;
+    max-width: 820px; margin: 0 auto;
+  }
+  .number-label {
+    text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 8px;
+  }
+  .time {
+    background: var(--yellow-soft); border-radius: 25px;
+    min-height: 190px; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(68px, 13vw, 130px); font-weight: 900; letter-spacing: 2px;
+  }
+  .listen {
+    display: flex; justify-content: center; margin: 16px 0 6px;
+  }
+  .listen button {
+    border: 0; border-radius: 999px; background: #222; color: #fff;
+    width: 76px; height: 76px; font-size: 38px; cursor: pointer;
+  }
+  .instruction {
+    text-align: center; font-size: 22px; font-weight: 800; margin: 14px 0;
+  }
+  
+  /* --- BLOC DES CHOIX (PC / DE BASE) --- */
+  .choices {
+    display: flex;
+    flex-direction: row;      /* En ligne par défaut sur PC */
+    justify-content: center;  /* Centré au milieu */
+    gap: 24px;                /* Espace confortable sur PC */
+    margin-top: 20px;
+    width: 100%;
+  }
+  .choice-wrap {
+    display: flex; 
+    flex-direction: column;   /* 🔊 AU-DESSUS du chiffre ① */
+    align-items: center; 
+    gap: 8px;
+    min-width: 100px;
+  }
+  .choice-listen {
+    border: 0; border-radius: 50%; background: #222; color: #fff;
+    width: 70px; height: 70px; font-size: 34px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .choice-listen:hover { transform: scale(1.04); }
+  .choice-listen:focus-visible {
+    outline: 4px solid var(--blue); outline-offset: 3px;
+  }
+  .choice {
+    width: 100%; border: 4px solid #fff; border-radius: 22px; background: #fff;
+    min-height: 92px; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px; padding: 10px 20px;
+    font-weight: 800; font-size: 18px; transition: .15s;
+  }
+  .choice:hover { transform: translateY(-2px); }
+  .choice:focus-visible { outline: 4px solid var(--blue); outline-offset: 2px; }
+  .choice.selected { background: #222; color: #fff; border-color: #222; }
+  .choice.correct { box-shadow: 0 0 0 5px var(--green) inset; }
+  .choice.wrong { box-shadow: 0 0 0 5px var(--red) inset; }
+  .choice .num { font-size: 22px; }
+  .choice .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  
+  /* --- INTERFACE FINALE --- */
+  .feedback {
+    min-height: 34px; text-align: center; padding-top: 10px;
+    font-size: 20px; font-weight: 800;
+  }
+  .feedback.good { color: var(--green); }
+  .feedback.bad { color: var(--red); }
+  .actions { text-align: center; margin-top: 20px; }
+  #validate {
+    border: 0; border-radius: 18px; background: #222; color: #fff;
+    padding: 15px 28px; font-size: 21px; font-weight: 800; cursor: pointer;
+  }
+  #validate:disabled { opacity: .45; cursor: not-allowed; }
+  #reset {
+    margin-left: 10px; border: 2px solid #222; border-radius: 18px; background: #fff;
+    padding: 13px 22px; font-size: 18px; cursor: pointer;
+  }
+  #result { min-height: 42px; margin-top: 15px; text-align: center; font-size: 23px; font-weight: 800; }
+  .success { color: var(--green); }
+  .failure { color: var(--red); }
+  .progress { text-align: center; font-weight: 800; font-size: 17px; margin-top: 15px; }
+  .stepbar {
+    height: 12px; background: #eee; border-radius: 999px; overflow: hidden;
+    max-width: 500px; margin: 8px auto 0;
+  }
+  .stepbar span { display: block; height: 100%; background: #222; width: 0%; transition: width .25s; }
+  footer { text-align: center; margin-top: 22px; color: #555; font-size: 14px; }
+
+  /* 📱 ADAPTATIONS POUR SMARTPHONES (Max 600px) */
+  @media (max-width: 600px) {
+    .mode {
+      flex-direction: column;   /* Niveaux empilés verticalement */
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    .mode button {
+      padding: 10px; font-size: 14px;
+    }
+    .choices {
+      flex-wrap: nowrap;        /* Tout reste aligné horizontalement */
+      gap: 6px;                 /* Espace réduit au minimum */
+    }
+    .choice-wrap {
+      flex: 1;                  /* 33% de la largeur de l'écran chacun */
+      min-width: 0;
+      gap: 4px;
+    }
+    .choice-listen {
+      width: 100%; height: auto; aspect-ratio: 1; /* Reste rond mais s'adapte à la largeur */
+      font-size: 24px;
+    }
+    .choice {
+      width: 100%; padding: 8px 2px; font-size: 14px; min-height: 60px;
+    }
+    .choice .num {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+
+<!-- Lien vers le manifest de cet exercice -->
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<main class="page">
+<header>
+  <h1>Apprends à lire l'heure <span class="sound" id="titleSpeak" title="Écouter">🔊</span></h1>
+  <p class="subtitle">Écoute les heures et choisis la bonne réponse.</p>
+
+  <div class="mode" aria-label="Niveau de difficulté">
+    <button id="level1" class="active" type="button">Niveau 1 — Heures exactes, quarts et demies</button>
+    <button id="level2" type="button">Niveau 2 — Toutes les 5 minutes</button>
+    <button id="level3" type="button">Niveau 3 — Horaires précis</button>
+  </div>
+
+  <div class="mode" aria-label="Mode de correction">
+    <button id="immediate" class="active" type="button">🎵 Correction immédiate</button>
+    <button id="final" type="button">📝 Je réponds puis je valide</button>
+  </div>
+  <div id="hint" class="hint">Écoute chaque proposition. Les boutons ① ② ③ sont seulement des repères.</div>
+</header>
+
+<section class="exercise">
+  <div class="number-label">Quelle heure entends-tu ?</div>
+  <div class="time" id="timeDisplay" aria-label="heure affichée">08:25</div>
+
+  <div class="listen">
+    <button id="listenTime" type="button" title="Écouter l'heure">🔊</button>
+  </div>
+
+  <div class="instruction">Écoute chaque 🔊. Quand tu as trouvé, choisis la réponse juste en dessous.</div>
+  <div class="choices" id="choices"></div>
+  <div id="feedback" class="feedback" aria-live="polite"></div>
+
+  <div class="actions">
+    <button id="validate" type="button" disabled>Valider</button>
+    <button id="reset" type="button">Nouvelle heure</button>
+  </div>
+  <div id="result"></div>
+
+  <div class="progress">
+    <span id="progressText">Exercice 1</span>
+    <div class="stepbar"><span id="progressBar"></span></div>
+  </div>
+</section>
+
+<footer>Les consignes et les réponses sont lues à voix haute par le navigateur.</footer>
+</main>
+
+<script>
+const levelDefinitions = {
+  1: "Heures exactes, quarts d'heure et demi-heures",
+  2: "Toutes les 5 minutes",
+  3: "Horaires précis"
+};
+
+let currentLevel = 1;
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function makeTime(h, m) {
+  return `${pad2(h)}:${pad2(m)}`;
+}
+
+function hourCandidates(h, m) {
+  const correct = heureEnLettres(makeTime(h, m));
+  const candidates = [correct];
+  const alternatives = [
+    makeTime((h + 1) % 24, m),
+    makeTime((h + 23) % 24, m),
+    makeTime(h, (m + 5) % 60),
+    makeTime(h, (m + 55) % 60)
+  ];
+  for (const t of alternatives) {
+    const label = heureEnLettres(t);
+    if (!candidates.includes(label)) candidates.push(label);
+    if (candidates.length === 3) break;
+  }
+  return candidates;
+}
+
+function generateTime(level) {
+  const h = rnd(0, 23);
+  let m;
+  if (level === 1) {
+    const allowed = [0, 15, 30, 45];
+    m = allowed[rnd(0, allowed.length - 1)];
+  } else if (level === 2) {
+    m = rnd(0, 11) * 5;
+  } else {
+    m = rnd(0, 59);
+  }
+  return makeTime(h, m);
+}
+
+function buildExercise(level) {
+  const time = generateTime(level);
+  const [h, m] = time.split(":").map(Number);
+  return [time, hourCandidates(h, m)];
+}
+
+function rnd(a, b) {
+  return Math.floor(Math.random() * (b - a + 1)) + a;
+}
+
+let index = 0;
+let selected = null;
+let mode = "immediate";
+
+const timeDisplay = document.getElementById("timeDisplay");
+const choices = document.getElementById("choices");
+const feedback = document.getElementById("feedback");
+const validate = document.getElementById("validate");
+const result = document.getElementById("result");
+const progressText = document.getElementById("progressText");
+const progressBar = document.getElementById("progressBar");
+
+const synth = window.speechSynthesis;
+
+function speak(s) {
+  synth.cancel();
+  let u = new SpeechSynthesisUtterance(s);
+  u.lang = "fr-FR";
+  u.rate = .82;
+  synth.speak(u);
+}
+
+
+function heureEnLettres(hhmm) {
+  let texte = "";
+  if (hhmm && typeof hhmm === "object") {
+    texte = hhmm.text || hhmm.time || JSON.stringify(hhmm);
+  } else {
+    texte = String(hhmm);
+  }
+
+  // Extrait tous les blocs de chiffres (ex: ["07", "45"])
+  let nombres = texte.match(/\d+/g);
+
+  if (!nombres || nombres.length < 2) {
+    return "choix disponible";
+  }
+
+  // 🔒 SÉCURITÉ ABSOLUE : On extrait les nombres SANS utiliser aucun crochet [ ]
+  const heureBrute = nombres.shift();  // Récupère le premier élément
+  const minuteBrute = nombres.shift(); // Récupère le deuxième élément
+
+  const h = parseInt(heureBrute, 10);
+  const m = parseInt(minuteBrute, 10);
+
+  const heures = [
+    "minuit", "une heure", "deux heures", "trois heures", "quatre heures",
+    "cinq heures", "six heures", "sept heures", "huit heures", "neuf heures",
+    "dix heures", "onze heures", "midi", "treize heures", "quatorze heures",
+    "quinze heures", "seize heures", "dix sept heures", "dix huit heures",
+    "dix neuf heures", "vingt heures", "vingt et une heures",
+    "vingt deux heures", "vingt trois heures"
+  ];
+
+  const heureTexte = heures[h] || `${h} heures`;
+
+  if (m === 0) {
+    return heureTexte;
+  }
+
+  if (m === 1) {
+    return `${heureTexte} une minute`;
+  }
+
+  if (m % 5 === 0) {
+    const minutesDico = {
+      5: "cinq", 10: "dix", 15: "quinze", 20: "vingt", 25: "vingt cinq",
+      30: "trente", 35: "trente cinq", 40: "quarante", 45: "quarante cinq",
+      50: "cinquante", 55: "cinquante cinq"
+    };
+    return `${heureTexte} ${minutesDico[m]}`;
+  }
+
+  return `${heureTexte} ${m} minutes`;
+}
+
+
+
+
+function loadExercise() {
+  const [time, candidates] = buildExercise(currentLevel);
+  timeDisplay.textContent = time;
+  timeDisplay.setAttribute("aria-label", heureEnLettres(time));
+  choices.innerHTML = "";
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  result.textContent = "";
+  selected = null;
+  validate.disabled = true;
+
+  const shuffled = candidates.map((text, i) => ({text, correct: i === 0}));
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  shuffled.forEach((item, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "choice-wrap";
+
+    const listen = document.createElement("button");
+    listen.type = "button";
+    listen.className = "choice-listen";
+    listen.title = `Écouter la proposition ${i + 1}`;
+    listen.setAttribute("aria-label", `Écouter la proposition ${i + 1}`);
+    listen.textContent = "🔊";
+    
+    // 🔒 SÉCURITÉ : On envoie DIRECTEMENT item.text à la fonction de lecture.
+    // Pas d'intermédiaire HTML, pas de recherche dans le DOM.
+    listen.addEventListener("click", (event) => {
+      event.stopPropagation();
+      
+      // Si item.text est déjà du texte en lettres (ex: "sept heures quarante-cinq"), on le lit directement.
+      // Si c'est un format "07:45", la fonction heureEnLettres le traduira.
+      if (typeof item.text === "string" && !item.text.includes(":")) {
+        speak(item.text);
+      } else {
+        speak(heureEnLettres(item.text));
+      }
+    });
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice";
+    btn.dataset.correct = item.correct ? "true" : "false";
+    btn.innerHTML = `<span class="num">${["①","②","③"][i]}</span>
+                     <span class="sr-only">${item.text}</span>`;
+    btn.setAttribute("aria-label", `Choisir la proposition ${i + 1}`);
+    btn.addEventListener("click", () => choose(btn, item.text));
+
+    wrap.appendChild(listen);
+    wrap.appendChild(btn);
+    choices.appendChild(wrap);
+  });
+
+  progressText.textContent = `Niveau ${currentLevel} — exercice ${index + 1}`;
+  progressBar.style.width = `${((index % 10) + 1) * 10}%`;
+
+  setTimeout(() => speak(heureEnLettres(time)), 250);
+}
+
+
+
+
+
+function choose(btn, text) {
+  document.querySelectorAll(".choice").forEach(b => {
+    b.classList.remove("selected");
+  });
+  btn.classList.add("selected");
+  selected = btn;
+  validate.disabled = false;
+  speak(text);
+
+  if (mode === "immediate") checkAnswer();
+}
+
+function checkAnswer() {
+  if (!selected) return;
+  document.querySelectorAll(".choice").forEach(b => b.classList.remove("correct","wrong"));
+
+  const good = selected.dataset.correct === "true";
+  selected.classList.add(good ? "correct" : "wrong");
+
+  if (good) {
+    feedback.textContent = "👏 Bien joué !";
+    feedback.className = "feedback good";
+    speak("Bien joué !");
+    validate.disabled = true;
+  } else {
+    feedback.textContent = "Essaie encore.";
+    feedback.className = "feedback bad";
+    speak("Essaie encore.");
+    validate.disabled = false;
+  }
+}
+
+document.getElementById("listenTime").addEventListener("click", () => {
+  speak(heureEnLettres(timeDisplay.textContent));
+});
+document.getElementById("titleSpeak").addEventListener("click", () => {
+  speak("Apprends à lire l'heure. Écoute les heures et choisis la bonne réponse.");
+});
+
+document.getElementById("immediate").addEventListener("click", () => {
+  mode = "immediate";
+  document.getElementById("immediate").classList.add("active");
+  document.getElementById("final").classList.remove("active");
+  document.getElementById("hint").textContent = "Écoute chaque proposition. La correction est immédiate.";
+  if (selected) checkAnswer();
+});
+
+document.getElementById("final").addEventListener("click", () => {
+  mode = "final";
+  document.getElementById("final").classList.add("active");
+  document.getElementById("immediate").classList.remove("active");
+  document.getElementById("hint").textContent = "Choisis une réponse, puis appuie sur « Valider ».";
+});
+
+validate.addEventListener("click", checkAnswer);
+
+// 1. Bouton Reset corrigé (fermé proprement au bout d'une ligne)
+document.getElementById("reset").addEventListener("click", () => {
+  index++;
+  loadExercise(); // On passe à l'exercice suivant directement
+});
+
+// 2. Fonction de changement de niveau (accessible globalement maintenant)
+function selectLevel(level) {
+  currentLevel = level;
+  index = 0;
+  document.querySelectorAll("#level1,#level2,#level3").forEach(b => b.classList.remove("active"));
+  document.getElementById(`level${level}`).classList.add("active");
+  const descriptions = {
+    1: "Niveau 1 : heures exactes, quarts d'heure et demi-heures.",
+    2: "Niveau 2 : minutes par blocs de 5.",
+    3: "Niveau 3 : horaires précis, toutes les minutes."
+  };
+  document.getElementById("hint").textContent =
+    `${descriptions[level]} ${mode === "immediate" ? "La correction est immédiate." : "Choisis une réponse, puis appuie sur « Valider »."}`;
+  loadExercise();
+}
+
+// 3. Écouteurs de clics pour les niveaux (actifs dès le chargement de la page)
+document.getElementById("level1").addEventListener("click", () => selectLevel(1));
+document.getElementById("level2").addEventListener("click", () => selectLevel(2));
+document.getElementById("level3").addEventListener("click", () => selectLevel(3));
+
+// Lancement initial au chargement du script
+loadExercise();
+
+
+loadExercise();
+</script>
+<!-- Script pour enregistrer le Service Worker de cet exercice -->
+<script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker enregistré pour cet exercice.'))
+            .catch((err) => console.error('Erreur Service Worker:', err));
+        }
+</script>
+  <footer><center>Activité autonome — fonctionne sans connexion Internet.
+    <br>&copy; 2026 La Boussole 33840 Captieux. Tous droits réservés.</center>
+  </footer>
+</body>
+</html>
