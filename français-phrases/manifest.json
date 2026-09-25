@@ -1,0 +1,24 @@
+{
+  "name": "Français : Les Phrases",
+  "short_name": "Phrases",
+  "description": "Exercice autonome pour reconstituer l'ordre des phrases .",
+  "start_url": "./exercice_phrases.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffd83d",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
