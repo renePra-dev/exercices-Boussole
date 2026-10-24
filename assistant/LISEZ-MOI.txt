@@ -1,0 +1,8 @@
+MON ASSISTANT SMS — prototype PWA
+
+Les numéros dans index.html sont fictifs : remplacez-les avant utilisation.
+Pour installer la PWA et la voir dans le menu Partager, hébergez les fichiers sur une adresse HTTPS. L'ouverture directe du HTML ne suffit pas.
+Sur le Galaxy : ouvrez l'adresse HTTPS avec Chrome, puis menu ⋮ > Installer l'application / Ajouter à l'écran d'accueil.
+Pour un SMS reçu : Google Messages > ouvrir le SMS > Partager > choisir Mon Assistant SMS, si cette option est proposée par le téléphone.
+La dictée dépend du navigateur et de l'autorisation du micro. La lecture utilise la synthèse vocale du navigateur.
+Le prototype ne lit pas directement la boîte de réception et n'envoie pas automatiquement le SMS : il prépare le texte et ouvre l'application SMS pour vérification et envoi par l'utilisateur.
