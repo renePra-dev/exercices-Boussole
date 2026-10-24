@@ -25,4 +25,17 @@ $("listenReceived").onclick=()=>{let t=sharedText();if(t){msg.value=t;speak(t,tr
 $("clearReceived").onclick=()=>{msg.value="";history.replaceState({}, "", location.pathname);rs.textContent="Texte effacé.";rs.classList.remove("hidden")};
 if(sharedText()){msg.value=sharedText();rs.textContent="SMS partagé reçu. Appuyez sur « Écouter le SMS reçu ».";rs.classList.remove("hidden")}
 if("serviceWorker"in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("./sw.js").catch(()=>{});
-</script></body></html>
+</script>
+
+<!-- Script pour enregistrer le Service Worker de cet exercice -->
+<script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker enregistré pour cet exercice.'))
+            .catch((err) => console.error('Erreur Service Worker:', err));
+        }
+</script>
+  <footer><center>Activité autonome — fonctionne sans connexion Internet.
+    <br>&copy; 2026 La Boussole 33840 Captieux. Tous droits réservés.</center>
+  </footer>
+</body></html>
