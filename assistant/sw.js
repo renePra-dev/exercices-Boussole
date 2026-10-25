@@ -9,12 +9,10 @@ const ASSETS = [
 
 // 1. Installation : Mise en cache immédiate de l'exercice
 self.addEventListener('install', (e) => {
-  // Force le Service Worker à devenir actif immédiatement sans attendre
-  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
