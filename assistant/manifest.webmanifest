@@ -1,20 +1,22 @@
 {
+  "id": "./mon-assistant-sms.html",
   "name": "Mon Assistant SMS",
   "short_name": "Assistant SMS",
   "start_url": "./mon-assistant-sms.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#ffd83d",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "./icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
