@@ -1,46 +1,34 @@
-const CACHE_NAME = 'assistant-sms';
+const CACHE_NAME = 'assistant-sms-v2';
 const ASSETS = [
   './mon-assistant-sms.html',
   './manifest.webmanifest',
   './icon.png',
   './icon-512.png'
-  
 ];
 
-// 1. Installation : Mise en cache immédiate de l'exercice
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(ASSETS);
+    await self.skipWaiting();
+  })());
 });
 
-// 2. Nettoyage : Supprime les anciens caches si vous changez de version (ex: v2)
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
-  );
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
-// 3. Stratégie : CACHE D'ABORD pour un chargement instantané sans réseau
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      // Si le fichier est dans le cache, on le sert immédiatement
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      // Sinon, on va le chercher sur le réseau (sécurité)
-      return fetch(e.request);
-    })
-  );
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return fetch(request);
+  })());
 });
