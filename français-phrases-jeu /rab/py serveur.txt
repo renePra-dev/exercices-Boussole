@@ -1,0 +1,18 @@
+
+lancer un serveur en python
+
+Pour lancer un serveur web local en une seule commande avec Python, utilisez le module intégré http.server dans votre terminal. Cette méthode démarre instantanément un serveur sur le port 8000 à partir du dossier actuel.
+
+1. Lancer un serveur statique (fichiers HTML, CSS, JS)
+
+Ouvrez votre invite de commandes (Windows) ou terminal (macOS/Linux), 
+placez-vous dans le dossier de votre projet (cd chemin/du/dossier) et exécutez :
+bash
+python -m http.server
+Utilisez le code avec précaution.
+
+(Sur macOS ou Linux, utilisez python3 -m http.server si la commande python n'est pas reconnue).
+• Accéder au serveur. Ouvrez votre navigateur et rendez-vous à l'adresse http://localhost:8000. Si un fichier index.html est présent dans le dossier, il s'affichera automatiquement.
+• Changer de port. Ajoutez le numéro de port souhaité à la fin de la commande (par exemple python -m http.server 8080).
+• Choisir un autre dossier. Utilisez l'option -d suivie du chemin cible (python -m http.server -d /chemin/dossier).
+• Arrêter le serveur. Appuyez sur les touches Ctrl + C dans le terminal.

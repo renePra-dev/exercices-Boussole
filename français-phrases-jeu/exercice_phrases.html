@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffd83d">
+  <title>Remets les phrases dans l'ordre</title>
+  <link rel="manifest" href="./manifest.json">
+  <style>
+:root {
+      --yellow: #ffd83d;
+      --yellow-soft: #fff7d7;
+      --cream: #fffdf5;
+      --ink: #171717;
+      --green: #35a853;
+      --red: #d94841;
+      --blue: #2367d1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #fff;
+      color: var(--ink);
+    }
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 40px; }
+    header { text-align: center; margin-bottom: 22px; }
+    h1 { font-size: clamp(26px, 5vw, 42px); margin: 0 0 8px; }
+    .subtitle { font-size: clamp(16px, 2.5vw, 20px); margin: 0 0 18px; color: #555; }
+
+    /* --- NAVIGATION NIVEAUX --- */
+    .mode { 
+      display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 18px auto 10px; 
+      position: relative; z-index: 10;
+    }
+    .mode button {
+      border: 2px solid #222; background: white; border-radius: 999px;
+      padding: 10px 16px; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .mode button.active { background: #222; color: #fff; }
+    
+    .hint { text-align: center; min-height: 28px; font-size: 16px; font-weight: 600; margin: 10px 0 18px; }
+    
+    /* --- CADRE DE L'EXERCICE (Charte graphique Jaune) --- */
+    .exercise {
+      background: var(--yellow); border-radius: 30px; padding: 24px;
+      max-width: 820px; margin: 0 auto;
+    }
+    
+    /* Zone de dépôt (Phrase en construction) */
+    .zone-reponse {
+      background: var(--yellow-soft); border-radius: 25px;
+      min-height: 140px; display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 10px; padding: 20px; margin-bottom: 20px;
+      border: 2px dashed rgba(0,0,0,0.15);
+    }
+
+    /* Zone des mots mélangés */
+    .zone-mots {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+      min-height: 80px; padding: 10px; background: rgba(255,255,255,0.3);
+      border-radius: 20px; margin-bottom: 15px;
+    }
+
+    /* --- ÉTIQUETTES DES MOTS --- */
+    .word-btn {
+      background: #fff; border: 3px solid #fff; border-radius: 16px;
+      padding: 12px 20px; font-size: 18px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.1s ease;
+      user-select: none;
+    }
+    .word-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.1); }
+    .word-btn:active { transform: translateY(0); }
+    
+    /* --- ÉTATS DE CORRECTION --- */
+    .word-btn.correct { border-color: var(--green); background: #eaf6ec; }
+    .word-btn.wrong { border-color: var(--red); background: #fdf2f2; }
+
+    .feedback {
+      min-height: 34px; text-align: center; padding-top: 5px;
+      font-size: 22px; font-weight: 800;
+    }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--red); }
+
+    /* --- BOUTONS ACTIONS --- */
+    .actions { text-align: center; margin-top: 20px; }
+    #validate {
+      border: 0; border-radius: 18px; background: #222; color: #fff;
+      padding: 15px 32px; font-size: 20px; font-weight: 800; cursor: pointer;
+    }
+    #validate:disabled { opacity: .45; cursor: not-allowed; }
+    #next {
+      margin-left: 10px; border: 2px solid #222; border-radius: 18px; background: #fff;
+      padding: 13px 26px; font-size: 18px; font-weight: 600; cursor: pointer;
+    }
+
+    .progress { text-align: center; font-weight: 800; font-size: 16px; margin-top: 20px; }
+    .sound {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%; background: var(--yellow);
+    font-size: 24px; cursor: pointer; border: 0; vertical-align: middle; margin-left: 8px;
+    }
+    .sound:hover { transform: scale(1.05); }
+
+    footer { text-align: center; margin-top: 22px; color: #555; font-size: 14px; }
+
+    /* 📱 RESPONSIVE MOBILE */
+    @media (max-width: 600px) {
+      .mode { flex-direction: column; gap: 5px; }
+      .mode button { padding: 10px; font-size: 14px; }
+      .exercise { padding: 15px; border-radius: 20px; }
+      .word-btn { padding: 8px 14px; font-size: 15px; border-radius: 12px; }
+      .zone-reponse { min-height: 110px; padding: 10px; }
+      #validate, #next { width: 100%; margin: 5px 0; }
+      #next { margin-left: 0; }
+    }
+
+    .game-label {
+      text-align: center;
+      margin: 18px 0 4px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .game-menu {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 10px auto 14px;
+      position: relative;
+      z-index: 10;
+    }
+    .game-menu button {
+      border: 2px solid #2367d1;
+      background: #fff;
+      color: #174a9a;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .game-menu button.active {
+      background: #2367d1;
+      color: #fff;
+    }
+    button:focus-visible {
+      outline: 3px solid #174a9a;
+      outline-offset: 3px;
+    }
+    .loading {
+      text-align: center;
+      font-weight: 700;
+      margin: 18px 0;
+    }
+    @media (max-width: 600px) {
+      .game-menu { flex-direction: column; gap: 5px; }
+      .game-menu button { padding: 10px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Remets la phrase dans l'ordre
+      <button type="button" class="sound" id="titleSpeak" title="Écouter la consigne" aria-label="Écouter la consigne" onclick="speakConsigne()">🔊</button>
+    </h1>
+    <div class="subtitle">Clique sur les mots pour construire ta phrase.</div>
+  </header>
+
+  <div class="game-label">Choisis un jeu</div>
+  <div class="game-menu" id="gameMenu" aria-label="Choix du jeu"></div>
+
+  <div class="mode" aria-label="Niveau de difficulté">
+    <button id="level1" class="active" onclick="changeLevel(1)">Niveau 1 — Phrases simples</button>
+    <button id="level2" onclick="changeLevel(2)">Niveau 2 — Phrases moyennes</button>
+    <button id="level3" onclick="changeLevel(3)">Niveau 3 — Phrases longues</button>
+  </div>
+
+  <div class="hint" id="hint">Chargement des phrases…</div>
+  <div class="loading" id="loadingMessage" role="status" aria-live="polite">Chargement des jeux…</div>
+
+  <div class="exercise" id="exercise" hidden>
+    <div class="zone-reponse" id="zoneReponse" aria-label="Votre phrase"></div>
+    <div class="zone-mots" id="zoneMots" aria-label="Mots à choisir"></div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <div class="actions">
+      <button id="listenConstruct" type="button" style="margin-right:10px; border:2px solid #222; border-radius:18px; background:#fff; padding:13px 22px; font-size:18px; cursor:pointer;" onclick="listenCurrentPhrase()">🔊 Écouter</button>
+      <button id="validate" disabled onclick="checkAnswer()">Valider</button>
+      <button id="next" onclick="nextExercise()">Nouvelle phrase</button>
+    </div>
+    <div class="progress" id="progressText">Phrase 1</div>
+  </div>
+</div>
+
+<footer>
+  Activité autonome — fonctionne sans connexion Internet.<br>
+  © 2026 La Boussole 33840 Captieux. Tous droits réservés.
+</footer>
+
+<script>
+  const STORAGE_GAME_KEY = "phrasesDernierJeu";
+  const STORAGE_LEVEL_KEY = "phrasesDernierNiveau";
+
+  let phraseData = null;
+  let currentGame = localStorage.getItem(STORAGE_GAME_KEY) || "1";
+  let currentLevel = Number(localStorage.getItem(STORAGE_LEVEL_KEY) || 1);
+  let currentIndex = 0;
+  let correctPhraseWords = [];
+
+  const zoneReponse = document.getElementById("zoneReponse");
+  const zoneMots = document.getElementById("zoneMots");
+  const feedback = document.getElementById("feedback");
+  const btnValidate = document.getElementById("validate");
+  const progressText = document.getElementById("progressText");
+  const exercise = document.getElementById("exercise");
+  const loadingMessage = document.getElementById("loadingMessage");
+
+  const levelHints = {
+    1: "Niveau 1 : Phrases simples.",
+    2: "Niveau 2 : Phrases moyennes.",
+    3: "Niveau 3 : Phrases longues."
+  };
+
+  async function loadPhrases() {
+    try {
+      // no-cache demande une vérification auprès du serveur à chaque ouverture.
+      const response = await fetch("./phrases.json", { cache: "no-cache" });
+      if (!response.ok) throw new Error("Réponse HTTP " + response.status);
+      phraseData = await response.json();
+
+      if (!phraseData || !phraseData.jeux || !Object.keys(phraseData.jeux).length) {
+        throw new Error("Le fichier phrases.json ne contient aucun jeu.");
+      }
+
+      const gameIds = Object.keys(phraseData.jeux);
+      if (!phraseData.jeux[currentGame]) currentGame = gameIds[0];
+
+      const game = phraseData.jeux[currentGame];
+      if (!game.niveaux || !game.niveaux[currentLevel] || !game.niveaux[currentLevel].length) {
+        currentLevel = [1, 2, 3].find(level => game.niveaux && Array.isArray(game.niveaux[level]) && game.niveaux[level].length) || 1;
+      }
+
+      localStorage.setItem(STORAGE_GAME_KEY, currentGame);
+      localStorage.setItem(STORAGE_LEVEL_KEY, String(currentLevel));
+
+      createGameMenu();
+      updateLevelButtons();
+      loadingMessage.hidden = true;
+      exercise.hidden = false;
+      initExercise();
+    } catch (error) {
+      console.error("Erreur de chargement des phrases :", error);
+      loadingMessage.textContent = "Impossible de charger les phrases. Vérifie que phrases.json est bien présent à côté de cette page, puis actualise.";
+      document.getElementById("hint").textContent = "Chargement impossible.";
+    }
+  }
+
+  function createGameMenu() {
+    const menu = document.getElementById("gameMenu");
+    menu.innerHTML = "";
+
+    Object.entries(phraseData.jeux).forEach(([id, jeu]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = jeu.nom || ("Jeu " + id);
+      button.classList.toggle("active", id === currentGame);
+      button.setAttribute("aria-pressed", String(id === currentGame));
+      button.addEventListener("click", () => changeGame(id));
+      menu.appendChild(button);
+    });
+  }
+
+  function updateLevelButtons() {
+    [1, 2, 3].forEach(level => {
+      const button = document.getElementById("level" + level);
+      const available = Array.isArray(phraseData.jeux[currentGame].niveaux?.[level])
+        && phraseData.jeux[currentGame].niveaux[level].length > 0;
+      button.hidden = !available;
+      button.classList.toggle("active", level === currentLevel);
+      button.setAttribute("aria-pressed", String(level === currentLevel));
+    });
+    document.getElementById("hint").textContent =
+      (phraseData.jeux[currentGame].nom || ("Jeu " + currentGame)) + " — " + (levelHints[currentLevel] || "");
+  }
+
+  function shuffleWords(words) {
+    const shuffled = [...words];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    // Évite que les mots restent dans le même ordre lorsque c'est possible.
+    if (shuffled.join("\u0000") === words.join("\u0000") && shuffled.length > 1) {
+      shuffled.push(shuffled.shift());
+    }
+    return shuffled;
+  }
+
+  function initExercise() {
+    const list = phraseData?.jeux?.[currentGame]?.niveaux?.[currentLevel];
+    if (!Array.isArray(list) || list.length === 0) {
+      loadingMessage.hidden = false;
+      loadingMessage.textContent = "Aucune phrase n'est disponible pour ce niveau.";
+      exercise.hidden = true;
+      return;
+    }
+
+    loadingMessage.hidden = true;
+    exercise.hidden = false;
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    zoneReponse.innerHTML = "";
+    zoneMots.innerHTML = "";
+    btnValidate.disabled = true;
+
+    const originalPhrase = list[currentIndex % list.length];
+    correctPhraseWords = String(originalPhrase).trim().split(/\s+/);
+    shuffleWords(correctPhraseWords).forEach(word => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "word-btn";
+      button.textContent = word;
+      button.addEventListener("click", () => handleWordClick(button));
+      zoneMots.appendChild(button);
+    });
+
+    progressText.textContent = "Phrase " + (currentIndex + 1) + " / " + list.length;
+  }
+
+  function handleWordClick(button) {
+    if (feedback.classList.contains("good")) return;
+
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    document.querySelectorAll(".word-btn").forEach(wordButton => {
+      wordButton.classList.remove("correct", "wrong");
+    });
+
+    if (button.parentNode === zoneMots) {
+      zoneMots.removeChild(button);
+      zoneReponse.appendChild(button);
+    } else if (button.parentNode === zoneReponse) {
+      zoneReponse.removeChild(button);
+      zoneMots.appendChild(button);
+    }
+
+    const chosenCount = zoneReponse.querySelectorAll(".word-btn").length;
+    btnValidate.disabled = chosenCount !== correctPhraseWords.length;
+  }
+
+  function checkAnswer() {
+    const chosenButtons = zoneReponse.querySelectorAll(".word-btn");
+    if (chosenButtons.length !== correctPhraseWords.length) return;
+
+    let isCorrect = true;
+    chosenButtons.forEach((button, index) => {
+      button.classList.remove("correct", "wrong");
+      if (button.textContent === correctPhraseWords[index]) {
+        button.classList.add("correct");
+      } else {
+        button.classList.add("wrong");
+        isCorrect = false;
+      }
+    });
+
+    if (isCorrect) {
+      feedback.textContent = "👏 Excellent ! La phrase est correcte.";
+      feedback.className = "feedback good";
+      btnValidate.disabled = true;
+    } else {
+      feedback.textContent = "❌ Ce n'est pas tout à fait ça. Réessaie !";
+      feedback.className = "feedback bad";
+    }
+  }
+
+  function nextExercise() {
+    currentIndex++;
+    initExercise();
+  }
+
+  function changeGame(gameId) {
+    if (!phraseData?.jeux?.[gameId]) return;
+    currentGame = gameId;
+    currentIndex = 0;
+    const levels = phraseData.jeux[currentGame].niveaux || {};
+    if (!Array.isArray(levels[currentLevel]) || !levels[currentLevel].length) {
+      currentLevel = [1, 2, 3].find(level => Array.isArray(levels[level]) && levels[level].length) || 1;
+    }
+    localStorage.setItem(STORAGE_GAME_KEY, currentGame);
+    localStorage.setItem(STORAGE_LEVEL_KEY, String(currentLevel));
+    createGameMenu();
+    updateLevelButtons();
+    initExercise();
+  }
+
+  function changeLevel(level) {
+    const list = phraseData?.jeux?.[currentGame]?.niveaux?.[level];
+    if (!Array.isArray(list) || !list.length) return;
+    currentLevel = level;
+    currentIndex = 0;
+    localStorage.setItem(STORAGE_LEVEL_KEY, String(currentLevel));
+    updateLevelButtons();
+    initExercise();
+  }
+
+  function speakText(text) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "fr-FR";
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function listenCurrentPhrase() {
+    const words = [...zoneReponse.querySelectorAll(".word-btn")].map(button => button.textContent);
+    speakText(words.length ? words.join(" ") : "La zone est vide. Clique sur des mots.");
+  }
+
+  function speakConsigne() {
+    speakText("Remets la phrase dans l'ordre. Clique sur les mots pour construire ta phrase.");
+  }
+
+  loadPhrases();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => console.log("Service Worker enregistré pour cet exercice."))
+        .catch(error => console.error("Erreur Service Worker :", error));
+    });
+  }
+</script>
+</body>
+</html>

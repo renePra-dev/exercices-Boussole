@@ -1,0 +1,61 @@
+{
+  "jeux": {
+    "1": {
+      "nom": "Jeu 1 — Vie quotidienne",
+      "niveaux": {
+        "1": [
+          "Le chat dort sur le tapis.",
+          "Maman prépare un bon gâteau.",
+          "Le chien joue dans le jardin."
+        ],
+        "2": [
+          "Chaque matin, je prends un café bien chaud.",
+          "Les enfants jouent au ballon dans la cour.",
+          "Elle achète des fruits frais au grand marché."
+        ],
+        "3": [
+          "Pour apprendre le français rapidement, il faut s'exercer très régulièrement chaque jour.",
+          "Dans la petite cuisine de notre appartement, mon père prépare un délicieux repas de fête."
+        ]
+      }
+    },
+    "2": {
+      "nom": "Jeu 2 — À l'école",
+      "niveaux": {
+        "1": [
+          "Paul écrit une jolie phrase.",
+          "La cloche sonne dans la cour.",
+          "Les élèves ouvrent leur cahier."
+        ],
+        "2": [
+          "La maîtresse explique une nouvelle leçon aux élèves.",
+          "Les enfants rangent leurs affaires avant la récréation.",
+          "Nous préparons un exposé sur les animaux."
+        ],
+        "3": [
+          "Chaque matin, les enfants retrouvent leurs camarades dans la cour de récréation.",
+          "Après la lecture, les élèves répondent aux questions dans leur cahier."
+        ]
+      }
+    },
+    "3": {
+      "nom": "Jeu 3 — Au travail",
+      "niveaux": {
+        "1": [
+          "Le patron arrive au bureau.",
+          "Sophie prépare les dossiers.",
+          "Les collègues prennent une pause."
+        ],
+        "2": [
+          "Les employés commencent leur travail à huit heures.",
+          "Le responsable organise la réunion de demain.",
+          "Nous envoyons les documents à notre collègue."
+        ],
+        "3": [
+          "Après une longue réunion, les collaborateurs organisent le travail de la semaine suivante.",
+          "Chaque vendredi, l'équipe fait le point sur les projets en cours."
+        ]
+      }
+    }
+  }
+}

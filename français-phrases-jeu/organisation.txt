@@ -1,0 +1,7 @@
+français-phrases/
+├── exercice_phrases.html
+├── phrases.json
+├── manifest.json
+├── sw.js
+├── icon.png
+└── icon-512.png
